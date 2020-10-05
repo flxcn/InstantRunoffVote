@@ -40,7 +40,7 @@ public class InstantRunoffVote {
 
     private String getRejectedEmailAddresses() {
         StringBuilder sb = new StringBuilder();
-        sb.append("(").append(rejectedBallots.size()).append(") REJECTED BALLOTS\n");
+        sb.append("(").append(rejectedBallots.size()).append(") REJECTED BALLOT\n");
         if(rejectedBallots.size() > 0) {
             sb.append("Rejected Email Addresses:\n");
 
@@ -59,7 +59,7 @@ public class InstantRunoffVote {
 
         // read the ballots, line by line
         for (String line = reader.readLine(); line != null; line = reader.readLine()) {
-            String emailAddress = line.trim();
+            String emailAddress = line.trim().toLowerCase();
             registeredEmailAddresses.add(emailAddress);
         }
 
@@ -80,7 +80,7 @@ public class InstantRunoffVote {
         for (String line = reader.readLine(); line != null; line = reader.readLine()) {
             String[] lineArray = line.split("\t");
             String timeSubmitted = lineArray[0];
-            String emailAddress = lineArray[1];
+            String emailAddress = lineArray[1].toLowerCase();
             String[] decisions = Arrays.copyOfRange(lineArray, 2, lineArray.length);
             Ballot ballot = new Ballot(id++, timeSubmitted, emailAddress, decisions);
 
