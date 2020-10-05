@@ -10,18 +10,18 @@ public class InstantRunoffVote {
     private ArrayList<String> registeredEmailAddresses;
 
     // getter and setter methods
-    public InstantRunoffVote(){
+    private InstantRunoffVote(){
         options = new ArrayList<>();
-        ballots = new ArrayList<Ballot>();
-        rejectedBallots = new ArrayList<Ballot>();
-        registeredEmailAddresses = new ArrayList<String>();
+        ballots = new ArrayList<>();
+        rejectedBallots = new ArrayList<>();
+        registeredEmailAddresses = new ArrayList<>();
     }
 
-    public ArrayList<String> getOptions() {
+    private ArrayList<String> getOptions() {
         return options;
     }
 
-    public void setOptions(ArrayList<String> options) {
+    private void setOptions(ArrayList<String> options) {
         this.options = options;
     }
 
@@ -33,27 +33,28 @@ public class InstantRunoffVote {
         this.ballots = decisions;
     }
 
-    public boolean verifyEmailAddress(String emailAddress) {
+    private boolean verifyEmailAddress(String emailAddress) {
         return registeredEmailAddresses.contains(emailAddress);
 
     }
 
-    public String getRejectedEmailAddresses() {
-        String output = "("+ rejectedBallots.size() + ") REJECTED BALLOTS\n";
+    private String getRejectedEmailAddresses() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("(").append(rejectedBallots.size()).append(") REJECTED BALLOTS\n");
         if(rejectedBallots.size() > 0) {
-            output += "Rejected Email Addresses:\n";
+            sb.append("Rejected Email Addresses:\n");
 
-            for(int i=0; i<rejectedBallots.size(); i++) {
-                output += rejectedBallots.get(i).getEmailAddress() + "\n";
+            for (Ballot rejectedBallot: rejectedBallots) {
+                sb.append(rejectedBallot.getEmailAddress()).append("\n");
             }
         }
 
-        return output;
+        return sb.toString();
     }
 
 
     // process the registered email addresses text file
-    public void readRegisteredEmailAddresses(String filename) throws IOException {
+    private void readRegisteredEmailAddresses(String filename) throws IOException {
         BufferedReader reader = new BufferedReader(new FileReader(filename));
 
         // read the ballots, line by line
@@ -67,12 +68,12 @@ public class InstantRunoffVote {
 
 
     // process the ballots text file
-    public void readBallots(String filename) throws IOException {
+    private void readBallots(String filename) throws IOException {
         BufferedReader reader = new BufferedReader(new FileReader(filename));
 
         // read first line (header), which lists the options
         String header = reader.readLine();
-        setOptions(new ArrayList<String>(Arrays.asList(header.split("\t"))));
+        setOptions(new ArrayList<>(Arrays.asList(header.split("\t"))));
 
         // read the ballots, line by line
         int id = 0;
@@ -94,7 +95,7 @@ public class InstantRunoffVote {
 
     }
 
-    public ArrayList<ArrayList<Ballot>> buildInitialTally(){
+    private ArrayList<ArrayList<Ballot>> buildInitialTally(){
         // initialize the ArrayList<Ballot> elements within the ArrayList
         ArrayList<ArrayList<Ballot>> tally = new ArrayList<>();
         for(int i=0; i<options.size(); i++){
@@ -103,17 +104,17 @@ public class InstantRunoffVote {
         }
 
         // add each ballot to the corresponding ArrayList<Ballot> element based on their first decision
-        for(int i=0; i<ballots.size(); i++){
-            String decision = ballots.get(i).getDecisions()[0];
+        for (Ballot ballot : ballots) {
+            String decision = ballot.getDecisions()[0];
             int decisionNumber = options.indexOf(decision);
-            tally.get(decisionNumber).add(ballots.get(i));
+            tally.get(decisionNumber).add(ballot);
         }
 
         return tally;
     }
 
     // get the winner
-    public void getWinner(int round, ArrayList<ArrayList<Ballot>> tally){
+    private void getWinner(int round, ArrayList<ArrayList<Ballot>> tally){
 
         ArrayList<Integer> optionsToBeEliminated = new ArrayList<>();
         int leastPopularOption = 0;
@@ -170,15 +171,15 @@ public class InstantRunoffVote {
         }
 
         // loop through each option that needs to be eliminated
-        for(int l=0; l<optionsToBeEliminated.size(); l++){
+        for (Integer option : optionsToBeEliminated) {
             // shift ballots away from least popular option(s)
-            while(tally.get(optionsToBeEliminated.get(l)).size() > 0){
-                Ballot ballot = tally.get(optionsToBeEliminated.get(l)).remove(0);
+            while(tally.get(option).size() > 0){
+                Ballot ballot = tally.get(option).remove(0);
                 String nextDecision = ballot.getDecisions()[1];
                 int nextDecisionNumber = options.indexOf(nextDecision);
 
                 int i=2;
-                while(i<options.size() && (tally.get(nextDecisionNumber).size()==0 || nextDecisionNumber == optionsToBeEliminated.get(l))){
+                while(i<options.size() && (tally.get(nextDecisionNumber).size()==0 || nextDecisionNumber == option)){
                     nextDecision = ballot.getDecisions()[i];
                     nextDecisionNumber = options.indexOf(nextDecision);
                     i++;
@@ -187,12 +188,29 @@ public class InstantRunoffVote {
             }
         }
 
+        //        for(int l=0; l<optionsToBeEliminated.size(); l++){
+        //            // shift ballots away from least popular option(s)
+        //            while(tally.get(optionsToBeEliminated.get(l)).size() > 0){
+        //                Ballot ballot = tally.get(optionsToBeEliminated.get(l)).remove(0);
+        //                String nextDecision = ballot.getDecisions()[1];
+        //                int nextDecisionNumber = options.indexOf(nextDecision);
+        //
+        //                int i=2;
+        //                while(i<options.size() && (tally.get(nextDecisionNumber).size()==0 || nextDecisionNumber == optionsToBeEliminated.get(l))){
+        //                    nextDecision = ballot.getDecisions()[i];
+        //                    nextDecisionNumber = options.indexOf(nextDecision);
+        //                    i++;
+        //                }
+        //                tally.get(nextDecisionNumber).add(ballot);
+        //            }
+        //        }
+
 
         getWinner(++round,tally);
     }
 
     public static void main(String[] args){
-        System.out.println("InstaCount. Created by Felix Chen. Copyright 2019. All rights reserved.");
+        System.out.println("InstaCount. Created by Felix Chen. Copyright 2020. All rights reserved.");
         Date date = new Date();
         System.out.println("Generated at " + date.toString());
         InstantRunoffVote irv = new InstantRunoffVote();
